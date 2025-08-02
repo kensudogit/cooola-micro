@@ -1,0 +1,107 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  # Prometheus itself
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # COOOLa Micro Services
+  - job_name: 'cooola-micro-core'
+    static_configs:
+      - targets: ['core-system:8080']
+    metrics_path: '/actuator/prometheus'
+    scrape_interval: 10s
+
+  - job_name: 'cooola-micro-api-gateway'
+    static_configs:
+      - targets: ['api-gateway:8081']
+    metrics_path: '/actuator/prometheus'
+    scrape_interval: 10s
+
+  - job_name: 'cooola-micro-product-service'
+    static_configs:
+      - targets: ['product-service:8082']
+    metrics_path: '/actuator/prometheus'
+    scrape_interval: 10s
+
+  - job_name: 'cooola-micro-inventory-service'
+    static_configs:
+      - targets: ['inventory-service:8083']
+    metrics_path: '/actuator/prometheus'
+    scrape_interval: 10s
+
+  - job_name: 'cooola-micro-transaction-service'
+    static_configs:
+      - targets: ['transaction-service:8084']
+    metrics_path: '/actuator/prometheus'
+    scrape_interval: 10s
+
+  - job_name: 'cooola-micro-report-service'
+    static_configs:
+      - targets: ['report-service:8085']
+    metrics_path: '/actuator/prometheus'
+    scrape_interval: 10s
+
+  - job_name: 'cooola-micro-notification-service'
+    static_configs:
+      - targets: ['notification-service:8086']
+    metrics_path: '/actuator/prometheus'
+    scrape_interval: 10s
+
+  # Eureka Service Discovery
+  - job_name: 'eureka-server'
+    static_configs:
+      - targets: ['eureka-server:8761']
+    metrics_path: '/actuator/prometheus'
+    scrape_interval: 30s
+
+  # MySQL Database
+  - job_name: 'mysql'
+    static_configs:
+      - targets: ['mysql:3306']
+    scrape_interval: 30s
+
+  # Redis Cache
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis:6379']
+    scrape_interval: 30s
+
+  # RabbitMQ Message Broker
+  - job_name: 'rabbitmq'
+    static_configs:
+      - targets: ['rabbitmq:15672']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+
+  # Elasticsearch
+  - job_name: 'elasticsearch'
+    static_configs:
+      - targets: ['elasticsearch:9200']
+    metrics_path: '/_prometheus/metrics'
+    scrape_interval: 30s
+
+  # Node Exporter (System Metrics)
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['node-exporter:9100']
+    scrape_interval: 15s
+
+  # Docker Container Metrics
+  - job_name: 'docker'
+    static_configs:
+      - targets: ['docker:9323']
+    scrape_interval: 15s
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          # - alertmanager:9093
+
+# Alert Rules
+rule_files:
+  - "alerts.yml" 

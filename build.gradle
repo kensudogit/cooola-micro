@@ -1,0 +1,90 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.2.0' apply false
+    id 'io.spring.dependency-management' version '1.1.4' apply false
+}
+
+allprojects {
+    group = 'com.cooola.micro'
+    version = '1.0.0'
+    
+    repositories {
+        mavenCentral()
+    }
+}
+
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'org.springframework.boot'
+    apply plugin: 'io.spring.dependency-management'
+    
+    java {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+    
+    ext {
+        set('springCloudVersion', "2023.0.0")
+    }
+    
+    dependencyManagement {
+        imports {
+            mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+        }
+    }
+    
+    dependencies {
+        compileOnly 'org.projectlombok:lombok'
+        annotationProcessor 'org.projectlombok:lombok'
+        
+        testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    }
+    
+    test {
+        useJUnitPlatform()
+    }
+}
+
+// プロジェクトの依存関係を定義
+project(':core:core-impl') {
+    dependencies {
+        implementation project(':core:core-api')
+        implementation project(':core:plugin-manager')
+    }
+}
+
+project(':core:plugin-manager') {
+    dependencies {
+        implementation project(':core:core-api')
+    }
+}
+
+project(':plugins:product-plugin') {
+    dependencies {
+        implementation project(':core:core-api')
+    }
+}
+
+project(':plugins:inventory-plugin') {
+    dependencies {
+        implementation project(':core:core-api')
+    }
+}
+
+project(':plugins:transaction-plugin') {
+    dependencies {
+        implementation project(':core:core-api')
+    }
+}
+
+project(':plugins:report-plugin') {
+    dependencies {
+        implementation project(':core:core-api')
+    }
+}
+
+project(':plugins:barcode-plugin') {
+    dependencies {
+        implementation project(':core:core-api')
+    }
+} 

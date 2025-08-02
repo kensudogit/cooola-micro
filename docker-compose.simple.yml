@@ -1,0 +1,106 @@
+# COOOLa Micro - 簡易版 Docker Compose設定
+# テスト用の最小構成
+
+services:
+  # MySQL データベース
+  mysql:
+    image: mysql:8.0
+    container_name: cooola-micro-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: cooola_micro
+      MYSQL_USER: cooola_user
+      MYSQL_PASSWORD: cooola_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./infrastructure/docker/mysql/init:/docker-entrypoint-initdb.d
+    networks:
+      - cooola-network
+    command: --default-authentication-plugin=mysql_native_password
+
+  # Redis キャッシュ
+  redis:
+    image: redis:7-alpine
+    container_name: cooola-micro-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - cooola-network
+
+  # RabbitMQ メッセージキュー
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: cooola-micro-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: cooola_user
+      RABBITMQ_DEFAULT_PASS: cooola_password
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - cooola-network
+
+  # Prometheus 監視
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: cooola-micro-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    networks:
+      - cooola-network
+
+  # Grafana ダッシュボード
+  grafana:
+    image: grafana/grafana:latest
+    container_name: cooola-micro-grafana
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+    networks:
+      - cooola-network
+
+  # 簡易Webサーバー（テスト用）
+  web-test:
+    image: nginx:alpine
+    container_name: cooola-micro-web-test
+    ports:
+      - "3000:80"
+    volumes:
+      - ./test-web:/usr/share/nginx/html
+    networks:
+      - cooola-network
+
+volumes:
+  mysql_data:
+    driver: local
+  redis_data:
+    driver: local
+  rabbitmq_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+
+networks:
+  cooola-network:
+    driver: bridge 

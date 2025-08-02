@@ -1,0 +1,21 @@
+rootProject.name = 'cooola-micro'
+
+// Core modules
+include 'core:core-api'
+include 'core:core-impl'
+include 'core:plugin-manager'
+include 'core:api-gateway'
+
+// Plugin modules
+include 'plugins:product-plugin'
+include 'plugins:inventory-plugin'
+include 'plugins:transaction-plugin'
+include 'plugins:report-plugin'
+include 'plugins:barcode-plugin'
+
+// Service modules
+include 'services:product-service'
+include 'services:inventory-service'
+include 'services:transaction-service'
+include 'services:report-service'
+include 'services:notification-service' 

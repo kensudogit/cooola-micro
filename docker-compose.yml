@@ -1,0 +1,348 @@
+# COOOLa Micro - マイクロカーネル型倉庫管理システム
+# Docker Compose設定
+
+services:
+  # Eureka Service Discovery
+  eureka-server:
+    image: openjdk:17-jdk-slim
+    container_name: cooola-micro-eureka
+    ports:
+      - "8761:8761"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    volumes:
+      - ./core/api-gateway:/app
+    working_dir: /app
+    command: ["./gradlew", "bootRun"]
+    networks:
+      - cooola-micro-network
+
+  # Config Server
+  config-server:
+    image: openjdk:17-jdk-slim
+    container_name: cooola-micro-config
+    ports:
+      - "8888:8888"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    volumes:
+      - ./core/core-impl:/app
+    working_dir: /app
+    command: ["./gradlew", "bootRun"]
+    networks:
+      - cooola-micro-network
+
+  # Core System
+  core-system:
+    image: openjdk:17-jdk-slim
+    container_name: cooola-micro-core
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_CLOUD_CONFIG_URI=http://config-server:8888
+    volumes:
+      - ./core/core-impl:/app
+    working_dir: /app
+    command: ["./gradlew", "bootRun"]
+    depends_on:
+      - eureka-server
+      - config-server
+    networks:
+      - cooola-micro-network
+
+  # API Gateway
+  api-gateway:
+    image: openjdk:17-jdk-slim
+    container_name: cooola-micro-gateway
+    ports:
+      - "8081:8081"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_CLOUD_CONFIG_URI=http://config-server:8888
+    volumes:
+      - ./core/api-gateway:/app
+    working_dir: /app
+    command: ["./gradlew", "bootRun"]
+    depends_on:
+      - eureka-server
+      - config-server
+    networks:
+      - cooola-micro-network
+
+  # Product Service
+  product-service:
+    image: openjdk:17-jdk-slim
+    container_name: cooola-micro-product
+    ports:
+      - "8082:8082"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_CLOUD_CONFIG_URI=http://config-server:8888
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/cooola_micro?useSSL=false&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=cooola_user
+      - SPRING_DATASOURCE_PASSWORD=cooola_password
+    volumes:
+      - ./services/product-service:/app
+    working_dir: /app
+    command: ["./gradlew", "bootRun"]
+    depends_on:
+      - eureka-server
+      - config-server
+      - mysql
+    networks:
+      - cooola-micro-network
+
+  # Inventory Service
+  inventory-service:
+    image: openjdk:17-jdk-slim
+    container_name: cooola-micro-inventory
+    ports:
+      - "8083:8083"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_CLOUD_CONFIG_URI=http://config-server:8888
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/cooola_micro?useSSL=false&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=cooola_user
+      - SPRING_DATASOURCE_PASSWORD=cooola_password
+    volumes:
+      - ./services/inventory-service:/app
+    working_dir: /app
+    command: ["./gradlew", "bootRun"]
+    depends_on:
+      - eureka-server
+      - config-server
+      - mysql
+    networks:
+      - cooola-micro-network
+
+  # Transaction Service
+  transaction-service:
+    image: openjdk:17-jdk-slim
+    container_name: cooola-micro-transaction
+    ports:
+      - "8084:8084"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_CLOUD_CONFIG_URI=http://config-server:8888
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/cooola_micro?useSSL=false&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=cooola_user
+      - SPRING_DATASOURCE_PASSWORD=cooola_password
+    volumes:
+      - ./services/transaction-service:/app
+    working_dir: /app
+    command: ["./gradlew", "bootRun"]
+    depends_on:
+      - eureka-server
+      - config-server
+      - mysql
+    networks:
+      - cooola-micro-network
+
+  # Report Service
+  report-service:
+    image: openjdk:17-jdk-slim
+    container_name: cooola-micro-report
+    ports:
+      - "8085:8085"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_CLOUD_CONFIG_URI=http://config-server:8888
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/cooola_micro?useSSL=false&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=cooola_user
+      - SPRING_DATASOURCE_PASSWORD=cooola_password
+    volumes:
+      - ./services/report-service:/app
+    working_dir: /app
+    command: ["./gradlew", "bootRun"]
+    depends_on:
+      - eureka-server
+      - config-server
+      - mysql
+    networks:
+      - cooola-micro-network
+
+  # Notification Service
+  notification-service:
+    image: openjdk:17-jdk-slim
+    container_name: cooola-micro-notification
+    ports:
+      - "8086:8086"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_CLOUD_CONFIG_URI=http://config-server:8888
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/cooola_micro?useSSL=false&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=cooola_user
+      - SPRING_DATASOURCE_PASSWORD=cooola_password
+    volumes:
+      - ./services/notification-service:/app
+    working_dir: /app
+    command: ["./gradlew", "bootRun"]
+    depends_on:
+      - eureka-server
+      - config-server
+      - mysql
+    networks:
+      - cooola-micro-network
+
+  # Frontend
+  frontend:
+    image: node:18-alpine
+    container_name: cooola-micro-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_API_BASE_URL=http://localhost:8081
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    working_dir: /app
+    command: ["npm", "start"]
+    depends_on:
+      - api-gateway
+    networks:
+      - cooola-micro-network
+
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: cooola-micro-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: cooola_micro
+      MYSQL_USER: cooola_user
+      MYSQL_PASSWORD: cooola_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./infrastructure/docker/mysql/init:/docker-entrypoint-initdb.d
+    networks:
+      - cooola-micro-network
+    command: --default-authentication-plugin=mysql_native_password
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: cooola-micro-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - cooola-micro-network
+
+  # RabbitMQ Message Broker
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: cooola-micro-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: cooola_user
+      RABBITMQ_DEFAULT_PASS: cooola_password
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - cooola-micro-network
+
+  # Prometheus Monitoring
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: cooola-micro-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    networks:
+      - cooola-micro-network
+
+  # Grafana Dashboard
+  grafana:
+    image: grafana/grafana:latest
+    container_name: cooola-micro-grafana
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
+    depends_on:
+      - prometheus
+    networks:
+      - cooola-micro-network
+
+  # Elasticsearch
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+    container_name: cooola-micro-elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ports:
+      - "9200:9200"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    networks:
+      - cooola-micro-network
+
+  # Kibana
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.11.0
+    container_name: cooola-micro-kibana
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    ports:
+      - "5601:5601"
+    depends_on:
+      - elasticsearch
+    networks:
+      - cooola-micro-network
+
+  # Jaeger Tracing
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: cooola-micro-jaeger
+    ports:
+      - "16686:16686"
+      - "14268:14268"
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+    networks:
+      - cooola-micro-network
+
+volumes:
+  mysql_data:
+    driver: local
+  redis_data:
+    driver: local
+  rabbitmq_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+  elasticsearch_data:
+    driver: local
+
+networks:
+  cooola-micro-network:
+    driver: bridge 

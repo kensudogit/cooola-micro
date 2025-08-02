@@ -1,0 +1,152 @@
+groups:
+  - name: cooola-micro-alerts
+    rules:
+      # サービスダウンアラート
+      - alert: ServiceDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Service {{ $labels.job }} is down"
+          description: "Service {{ $labels.job }} has been down for more than 1 minute."
+
+      # 高CPU使用率アラート
+      - alert: HighCPUUsage
+        expr: 100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU usage on {{ $labels.instance }}"
+          description: "CPU usage is above 80% for more than 5 minutes."
+
+      # 高メモリ使用率アラート
+      - alert: HighMemoryUsage
+        expr: (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory usage on {{ $labels.instance }}"
+          description: "Memory usage is above 85% for more than 5 minutes."
+
+      # 高ディスク使用率アラート
+      - alert: HighDiskUsage
+        expr: (node_filesystem_size_bytes - node_filesystem_free_bytes) / node_filesystem_size_bytes * 100 > 90
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High disk usage on {{ $labels.instance }}"
+          description: "Disk usage is above 90% for more than 5 minutes."
+
+      # データベース接続エラーアラート
+      - alert: DatabaseConnectionError
+        expr: mysql_global_status_connection_errors_total > 10
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Database connection errors on {{ $labels.instance }}"
+          description: "Database connection errors are occurring frequently."
+
+      # レディキューメッセージ蓄積アラート
+      - alert: RabbitMQMessageBacklog
+        expr: rabbitmq_queue_messages > 1000
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "RabbitMQ message backlog on {{ $labels.instance }}"
+          description: "Message queue has more than 1000 messages for more than 5 minutes."
+
+      # Elasticsearchクラスター状態アラート
+      - alert: ElasticsearchClusterRed
+        expr: elasticsearch_cluster_health_status{color="red"} > 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Elasticsearch cluster is red on {{ $labels.instance }}"
+          description: "Elasticsearch cluster health status is red."
+
+      # アプリケーションエラーレートアラート
+      - alert: HighErrorRate
+        expr: rate(http_requests_total{status=~"5.."}[5m]) / rate(http_requests_total[5m]) * 100 > 5
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High error rate on {{ $labels.job }}"
+          description: "Error rate is above 5% for more than 5 minutes."
+
+      # レスポンスタイムアラート
+      - alert: HighResponseTime
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 2
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High response time on {{ $labels.job }}"
+          description: "95th percentile response time is above 2 seconds for more than 5 minutes."
+
+      # JVM ヒープメモリ使用率アラート
+      - alert: HighJVMHeapUsage
+        expr: (jvm_memory_used_bytes{area="heap"} / jvm_memory_max_bytes{area="heap"}) * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High JVM heap usage on {{ $labels.job }}"
+          description: "JVM heap usage is above 80% for more than 5 minutes."
+
+      # ガベージコレクション時間アラート
+      - alert: LongGCTime
+        expr: rate(jvm_gc_collection_seconds_sum[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Long garbage collection time on {{ $labels.job }}"
+          description: "Garbage collection is taking longer than expected."
+
+      # スレッドプール使用率アラート
+      - alert: HighThreadPoolUsage
+        expr: (tomcat_threads_current / tomcat_threads_max) * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High thread pool usage on {{ $labels.job }}"
+          description: "Thread pool usage is above 80% for more than 5 minutes."
+
+      # データベース接続プール使用率アラート
+      - alert: HighDBConnectionPoolUsage
+        expr: (hikaricp_connections_active / hikaricp_connections_max) * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High database connection pool usage on {{ $labels.job }}"
+          description: "Database connection pool usage is above 80% for more than 5 minutes."
+
+      # 在庫不足アラート（ビジネスロジック）
+      - alert: LowInventory
+        expr: cooola_inventory_quantity < cooola_product_min_stock_level
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Low inventory for product {{ $labels.product_name }}"
+          description: "Product {{ $labels.product_name }} has inventory below minimum stock level."
+
+      # サービス間通信エラーアラート
+      - alert: ServiceCommunicationError
+        expr: rate(spring_cloud_gateway_requests_seconds_count{status=~"5.."}[5m]) > 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Service communication errors on {{ $labels.job }}"
+          description: "Service-to-service communication is failing." 
