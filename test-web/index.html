@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>COOOLa Micro - テストページ</title>
+    <title>COOOLa Micro - 倉庫管理システム</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -38,6 +38,26 @@
         .status-running { background-color: #28a745; }
         .status-stopped { background-color: #dc3545; }
         .status-unknown { background-color: #ffc107; }
+        .nav-tabs .nav-link {
+            color: #495057;
+            border: none;
+            border-radius: 10px 10px 0 0;
+            margin-right: 5px;
+        }
+        .nav-tabs .nav-link.active {
+            background-color: #fff;
+            color: #007bff;
+            border-bottom: 3px solid #007bff;
+        }
+        .table-container {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .btn-action {
+            margin: 2px;
+        }
     </style>
 </head>
 <body>
@@ -46,164 +66,221 @@
         <div class="hero-section text-center text-white">
             <h1><i class="fas fa-warehouse me-3"></i>COOOLa Micro</h1>
             <p class="lead">マイクロカーネル型倉庫管理システム</p>
-            <p class="mb-0">システムの状態とアクセス情報を確認できます</p>
+            <p class="mb-0">商品管理、在庫管理、取引履歴を確認できます</p>
         </div>
 
-        <!-- システム状態 -->
-        <div class="row">
-            <div class="col-md-8">
-                <div class="service-card">
-                    <h3><i class="fas fa-server me-2"></i>システム状態</h3>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="d-flex align-items-center mb-2">
-                                <span class="status-indicator status-running"></span>
-                                <span>MySQL データベース</span>
-                            </div>
-                            <div class="d-flex align-items-center mb-2">
-                                <span class="status-indicator status-running"></span>
-                                <span>Redis キャッシュ</span>
-                            </div>
-                            <div class="d-flex align-items-center mb-2">
-                                <span class="status-indicator status-running"></span>
-                                <span>RabbitMQ メッセージキュー</span>
-                            </div>
+        <!-- ナビゲーション -->
+        <ul class="nav nav-tabs" id="mainTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="dashboard-tab" data-bs-toggle="tab" data-bs-target="#dashboard" type="button" role="tab">
+                    <i class="fas fa-tachometer-alt me-2"></i>ダッシュボード
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="products-tab" data-bs-toggle="tab" data-bs-target="#products" type="button" role="tab">
+                    <i class="fas fa-box me-2"></i>商品管理
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="inventory-tab" data-bs-toggle="tab" data-bs-target="#inventory" type="button" role="tab">
+                    <i class="fas fa-warehouse me-2"></i>在庫管理
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="transactions-tab" data-bs-toggle="tab" data-bs-target="#transactions" type="button" role="tab">
+                    <i class="fas fa-exchange-alt me-2"></i>取引履歴
+                </button>
+            </li>
+        </ul>
+
+        <!-- タブコンテンツ -->
+        <div class="tab-content" id="mainTabsContent">
+            <!-- ダッシュボード -->
+            <div class="tab-pane fade show active" id="dashboard" role="tabpanel">
+                <div class="row mt-4">
+                    <div class="col-md-3 mb-4">
+                        <div class="service-card text-center">
+                            <i class="fas fa-box fa-3x text-primary mb-3"></i>
+                            <h3 id="totalProducts">5</h3>
+                            <p class="text-muted">総商品数</p>
                         </div>
-                        <div class="col-md-6">
-                            <div class="d-flex align-items-center mb-2">
-                                <span class="status-indicator status-running"></span>
-                                <span>Prometheus 監視</span>
-                            </div>
-                            <div class="d-flex align-items-center mb-2">
-                                <span class="status-indicator status-running"></span>
-                                <span>Grafana ダッシュボード</span>
-                            </div>
-                            <div class="d-flex align-items-center mb-2">
-                                <span class="status-indicator status-running"></span>
-                                <span>Web サーバー</span>
+                    </div>
+                    <div class="col-md-3 mb-4">
+                        <div class="service-card text-center">
+                            <i class="fas fa-warehouse fa-3x text-success mb-3"></i>
+                            <h3 id="totalInventory">198</h3>
+                            <p class="text-muted">総在庫数</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-4">
+                        <div class="service-card text-center">
+                            <i class="fas fa-exchange-alt fa-3x text-info mb-3"></i>
+                            <h3 id="todayTransactions">5</h3>
+                            <p class="text-muted">今日の取引</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-4">
+                        <div class="service-card text-center">
+                            <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
+                            <h3 id="lowStockAlerts">2</h3>
+                            <p class="text-muted">低在庫アラート</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="service-card">
+                            <h4><i class="fas fa-chart-line me-2"></i>在庫推移</h4>
+                            <canvas id="inventoryChart" width="400" height="200"></canvas>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="service-card">
+                            <h4><i class="fas fa-bell me-2"></i>最近の通知</h4>
+                            <div id="recentNotifications">
+                                <div class="alert alert-warning">
+                                    <small>2024-01-15 10:30</small><br>
+                                    商品「タブレット」の在庫が最小在庫レベルを下回りました
+                                </div>
+                                <div class="alert alert-info">
+                                    <small>2024-01-15 09:15</small><br>
+                                    商品「ノートPC」の入庫が完了しました
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            
-            <div class="col-md-4">
-                <div class="service-card">
-                    <h3><i class="fas fa-info-circle me-2"></i>システム情報</h3>
-                    <ul class="list-unstyled">
-                        <li><strong>バージョン:</strong> 1.0.0</li>
-                        <li><strong>環境:</strong> 開発環境</li>
-                        <li><strong>起動日時:</strong> <span id="startTime"></span></li>
-                        <li><strong>稼働時間:</strong> <span id="uptime"></span></li>
-                    </ul>
+
+            <!-- 商品管理 -->
+            <div class="tab-pane fade" id="products" role="tabpanel">
+                <div class="table-container">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h4><i class="fas fa-box me-2"></i>商品一覧</h4>
+                        <button class="btn btn-primary" onclick="showAddProductModal()">
+                            <i class="fas fa-plus me-1"></i>新規商品登録
+                        </button>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>商品コード</th>
+                                    <th>商品名</th>
+                                    <th>カテゴリ</th>
+                                    <th>価格</th>
+                                    <th>在庫数</th>
+                                    <th>ステータス</th>
+                                    <th>アクション</th>
+                                </tr>
+                            </thead>
+                            <tbody id="productsTableBody">
+                                <!-- 商品データがここに動的に挿入されます -->
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- アクセス情報 -->
-        <div class="row">
-            <div class="col-12">
-                <div class="service-card">
-                    <h3><i class="fas fa-link me-2"></i>アクセス情報</h3>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <h5>メインサービス</h5>
-                            <div class="list-group">
-                                <a href="http://localhost:3000" class="list-group-item list-group-item-action" target="_blank">
-                                    <i class="fas fa-globe me-2"></i>フロントエンド (Angular)
-                                </a>
-                                <a href="http://localhost:8081" class="list-group-item list-group-item-action" target="_blank">
-                                    <i class="fas fa-shield-alt me-2"></i>API ゲートウェイ
-                                </a>
-                                <a href="http://localhost:8761" class="list-group-item list-group-item-action" target="_blank">
-                                    <i class="fas fa-network-wired me-2"></i>Eureka サービスディスカバリ
-                                </a>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <h5>監視・管理</h5>
-                            <div class="list-group">
-                                <a href="http://localhost:3001" class="list-group-item list-group-item-action" target="_blank">
-                                    <i class="fas fa-chart-line me-2"></i>Grafana ダッシュボード (admin/admin)
-                                </a>
-                                <a href="http://localhost:9090" class="list-group-item list-group-item-action" target="_blank">
-                                    <i class="fas fa-chart-bar me-2"></i>Prometheus メトリクス
-                                </a>
-                                <a href="http://localhost:15672" class="list-group-item list-group-item-action" target="_blank">
-                                    <i class="fas fa-envelope me-2"></i>RabbitMQ 管理 (cooola_user/cooola_password)
-                                </a>
-                            </div>
-                        </div>
+            <!-- 在庫管理 -->
+            <div class="tab-pane fade" id="inventory" role="tabpanel">
+                <div class="table-container">
+                    <h4><i class="fas fa-warehouse me-2"></i>在庫状況</h4>
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>商品コード</th>
+                                    <th>商品名</th>
+                                    <th>現在在庫</th>
+                                    <th>最小在庫</th>
+                                    <th>最大在庫</th>
+                                    <th>ステータス</th>
+                                    <th>アクション</th>
+                                </tr>
+                            </thead>
+                            <tbody id="inventoryTableBody">
+                                <!-- 在庫データがここに動的に挿入されます -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 取引履歴 -->
+            <div class="tab-pane fade" id="transactions" role="tabpanel">
+                <div class="table-container">
+                    <h4><i class="fas fa-exchange-alt me-2"></i>取引履歴</h4>
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>取引ID</th>
+                                    <th>商品名</th>
+                                    <th>タイプ</th>
+                                    <th>数量</th>
+                                    <th>日時</th>
+                                    <th>担当者</th>
+                                </tr>
+                            </thead>
+                            <tbody id="transactionsTableBody">
+                                <!-- 取引データがここに動的に挿入されます -->
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- 機能説明 -->
-        <div class="row">
-            <div class="col-12">
-                <div class="service-card">
-                    <h3><i class="fas fa-cogs me-2"></i>システム機能</h3>
-                    <div class="row">
-                        <div class="col-md-3">
-                            <div class="text-center">
-                                <i class="fas fa-box fa-3x text-primary mb-2"></i>
-                                <h5>商品管理</h5>
-                                <p class="small">商品の登録・編集・削除、カテゴリ管理</p>
-                            </div>
+    <!-- 新規商品登録モーダル -->
+    <div class="modal fade" id="addProductModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">新規商品登録</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addProductForm">
+                        <div class="mb-3">
+                            <label class="form-label">商品コード</label>
+                            <input type="text" class="form-control" id="productCode" required>
                         </div>
-                        <div class="col-md-3">
-                            <div class="text-center">
-                                <i class="fas fa-warehouse fa-3x text-success mb-2"></i>
-                                <h5>在庫管理</h5>
-                                <p class="small">在庫追跡、アラート、移動管理</p>
-                            </div>
+                        <div class="mb-3">
+                            <label class="form-label">商品名</label>
+                            <input type="text" class="form-control" id="productName" required>
                         </div>
-                        <div class="col-md-3">
-                            <div class="text-center">
-                                <i class="fas fa-exchange-alt fa-3x text-warning mb-2"></i>
-                                <h5>入出庫管理</h5>
-                                <p class="small">入庫・出庫処理、履歴管理</p>
-                            </div>
+                        <div class="mb-3">
+                            <label class="form-label">カテゴリ</label>
+                            <select class="form-control" id="productCategory" required>
+                                <option value="">選択してください</option>
+                                <option value="電子機器">電子機器</option>
+                                <option value="アクセサリ">アクセサリ</option>
+                                <option value="オフィス用品">オフィス用品</option>
+                            </select>
                         </div>
-                        <div class="col-md-3">
-                            <div class="text-center">
-                                <i class="fas fa-chart-bar fa-3x text-info mb-2"></i>
-                                <h5>レポート</h5>
-                                <p class="small">各種レポート生成、分析</p>
-                            </div>
+                        <div class="mb-3">
+                            <label class="form-label">価格</label>
+                            <input type="number" class="form-control" id="productPrice" required>
                         </div>
-                    </div>
+                        <div class="mb-3">
+                            <label class="form-label">初期在庫数</label>
+                            <input type="number" class="form-control" id="productStock" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">キャンセル</button>
+                    <button type="button" class="btn btn-primary" onclick="addProduct()">登録</button>
                 </div>
             </div>
-        </div>
-
-        <!-- フッター -->
-        <div class="text-center text-white mt-4 mb-4">
-            <p>&copy; 2024 COOOLa Micro. All rights reserved.</p>
-            <p class="small">マイクロカーネルアーキテクチャによる柔軟で拡張可能な倉庫管理システム</p>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        // 起動時間を表示
-        document.getElementById('startTime').textContent = new Date().toLocaleString('ja-JP');
-        
-        // 稼働時間を更新
-        function updateUptime() {
-            const startTime = new Date();
-            const now = new Date();
-            const diff = now - startTime;
-            const hours = Math.floor(diff / (1000 * 60 * 60));
-            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-            document.getElementById('uptime').textContent = 
-                `${hours}時間 ${minutes}分 ${seconds}秒`;
-        }
-        
-        setInterval(updateUptime, 1000);
-        updateUptime();
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="app.js"></script>
 </body>
 </html> 

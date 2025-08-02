@@ -1,220 +1,39 @@
+server:
+  port: 8080
+
 spring:
   application:
-    name: cooola-micro-core
-  
-  profiles:
-    active: docker
-  
+    name: core-service
   datasource:
-    url: jdbc:mysql://mysql:3306/cooola_micro?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://mysql:3306/cooola_micro?useSSL=false&serverTimezone=UTC
     username: cooola_user
     password: cooola_password
     driver-class-name: com.mysql.cj.jdbc.Driver
-  
   jpa:
     hibernate:
-      ddl-auto: validate
-    show-sql: false
+      ddl-auto: update
+    show-sql: true
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQL8Dialect
-        format_sql: true
-  
-  cloud:
-    config:
-      uri: http://config-server:8888
-      fail-fast: true
-  
-  redis:
-    host: redis
-    port: 6379
-    timeout: 2000ms
-  
   rabbitmq:
     host: rabbitmq
     port: 5672
     username: cooola_user
     password: cooola_password
-    virtual-host: /
 
-# Eureka Client Configuration
 eureka:
   client:
     service-url:
       defaultZone: http://eureka-server:8761/eureka/
-    register-with-eureka: true
-    fetch-registry: true
   instance:
     prefer-ip-address: true
-    instance-id: ${spring.application.name}:${server.port}
 
-# Server Configuration
-server:
-  port: 8080
-
-# Management Endpoints
 management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics,prometheus,env,configprops
+        include: health,info,metrics
   endpoint:
     health:
-      show-details: always
-  metrics:
-    export:
-      prometheus:
-        enabled: true
-
-# Logging Configuration
-logging:
-  level:
-    com.cooola.micro: DEBUG
-    org.springframework.cloud: INFO
-    org.springframework.web: INFO
-  pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
-    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
-  file:
-    name: logs/cooola-micro-core.log
-
-# Plugin Configuration
-cooola:
-  plugin:
-    auto-load: true
-    scan-packages: com.cooola.micro.plugins
-    cache-enabled: true
-    hot-reload: true
-  
-  system:
-    name: COOOLa Micro
-    version: 1.0.0
-    environment: docker
-  
-  notification:
-    email:
-      enabled: true
-      smtp:
-        host: smtp.gmail.com
-        port: 587
-        username: ${EMAIL_USERNAME:}
-        password: ${EMAIL_PASSWORD:}
-    sms:
-      enabled: false
-  
-  inventory:
-    low-stock-threshold: 10
-    critical-stock-threshold: 5
-    auto-reorder: false
-  
-  barcode:
-    default:
-      width: 300
-      height: 100
-    qr:
-      size: 200
-    cache:
-      enabled: true
-
-# Security Configuration (Basic)
-security:
-  basic:
-    enabled: false
-  user:
-    name: admin
-    password: admin123
-
-# Actuator Configuration
-management:
-  security:
-    enabled: false
-  endpoints:
-    web:
-      base-path: /actuator
-      exposure:
-        include: "*"
-  endpoint:
-    health:
-      show-details: always
-      show-components: always
-    info:
-      enabled: true
-    metrics:
-      enabled: true
-    prometheus:
-      enabled: true
-
-# Micrometer Configuration
-management:
-  metrics:
-    export:
-      prometheus:
-        enabled: true
-        descriptions: true
-        step: 1m
-    tags:
-      application: ${spring.application.name}
-      environment: ${spring.profiles.active}
-    distribution:
-      percentiles-histogram:
-        http.server.requests: true
-      percentiles:
-        http.server.requests: 0.5, 0.95, 0.99
-
-# Circuit Breaker Configuration
-resilience4j:
-  circuitbreaker:
-    instances:
-      default:
-        sliding-window-size: 10
-        minimum-number-of-calls: 5
-        permitted-number-of-calls-in-half-open-state: 3
-        automatic-transition-from-open-to-half-open-enabled: true
-        wait-duration-in-open-state: 5s
-        failure-rate-threshold: 50
-        event-consumer-buffer-size: 10
-  retry:
-    instances:
-      default:
-        max-attempts: 3
-        wait-duration: 1s
-        retry-exceptions:
-          - java.io.IOException
-          - java.util.concurrent.TimeoutException
-
-# Cache Configuration
-spring:
-  cache:
-    type: redis
-    redis:
-      time-to-live: 600000
-      cache-null-values: false
-
-# Async Configuration
-spring:
-  task:
-    execution:
-      pool:
-        core-size: 8
-        max-size: 16
-        queue-capacity: 100
-        keep-alive: 60s
-      thread-name-prefix: cooola-async-
-
-# File Upload Configuration
-spring:
-  servlet:
-    multipart:
-      max-file-size: 10MB
-      max-request-size: 10MB
-      enabled: true
-
-# Jackson Configuration
-spring:
-  jackson:
-    date-format: yyyy-MM-dd HH:mm:ss
-    time-zone: Asia/Tokyo
-    serialization:
-      write-dates-as-timestamps: false
-    deserialization:
-      fail-on-unknown-properties: false 
+      show-details: always 
