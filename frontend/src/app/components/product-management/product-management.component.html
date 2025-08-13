@@ -1,0 +1,279 @@
+<div class="container-fluid">
+  <div class="row mb-4">
+    <div class="col-12">
+      <h1 class="h3 mb-0">
+        <i class="fas fa-box me-2"></i>{{ title }}
+      </h1>
+      <p class="text-muted">商品の登録、編集、削除を行います</p>
+    </div>
+  </div>
+
+  <!-- 統計カード -->
+  <div class="row mb-4">
+    <div class="col-md-6">
+      <div class="card border-left-primary shadow h-100 py-2">
+        <div class="card-body">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                総商品数
+              </div>
+              <div class="h5 mb-0 font-weight-bold text-gray-800">{{ totalProducts }}</div>
+            </div>
+            <div class="col-auto">
+              <i class="fas fa-box fa-2x text-gray-300"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="card border-left-success shadow h-100 py-2">
+        <div class="card-body">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                総価値
+              </div>
+              <div class="h5 mb-0 font-weight-bold text-gray-800">¥{{ totalValue | number }}</div>
+            </div>
+            <div class="col-auto">
+              <i class="fas fa-yen-sign fa-2x text-gray-300"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- 商品登録・編集フォーム -->
+    <div class="col-lg-4">
+      <div class="card shadow">
+        <div class="card-header">
+          <h6 class="m-0 font-weight-bold text-primary">
+            {{ isEditing ? '商品編集' : '新規商品登録' }}
+          </h6>
+        </div>
+        <div class="card-body">
+          <form [formGroup]="productForm" (ngSubmit)="onSubmit()">
+            <div class="mb-3">
+              <label for="name" class="form-label">商品名 *</label>
+              <input 
+                type="text" 
+                class="form-control" 
+                id="name" 
+                formControlName="name"
+                [class.is-invalid]="productForm.get('name')?.invalid && productForm.get('name')?.touched"
+              >
+              <div class="invalid-feedback" *ngIf="productForm.get('name')?.invalid && productForm.get('name')?.touched">
+                <div *ngIf="productForm.get('name')?.errors?.['required']">商品名は必須です</div>
+                <div *ngIf="productForm.get('name')?.errors?.['minlength']">商品名は2文字以上で入力してください</div>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="code" class="form-label">商品コード *</label>
+              <input 
+                type="text" 
+                class="form-control" 
+                id="code" 
+                formControlName="code"
+                [class.is-invalid]="productForm.get('code')?.invalid && productForm.get('code')?.touched"
+              >
+              <div class="invalid-feedback" *ngIf="productForm.get('code')?.invalid && productForm.get('code')?.touched">
+                <div *ngIf="productForm.get('code')?.errors?.['required']">商品コードは必須です</div>
+                <div *ngIf="productForm.get('code')?.errors?.['pattern']">商品コードは3-10文字の英数字で入力してください</div>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="category" class="form-label">カテゴリ *</label>
+              <select 
+                class="form-select" 
+                id="category" 
+                formControlName="category"
+                [class.is-invalid]="productForm.get('category')?.invalid && productForm.get('category')?.touched"
+              >
+                <option value="">カテゴリを選択</option>
+                <option *ngFor="let category of categories" [value]="category">{{ category }}</option>
+              </select>
+              <div class="invalid-feedback" *ngIf="productForm.get('category')?.invalid && productForm.get('category')?.touched">
+                カテゴリは必須です
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label for="price" class="form-label">価格 *</label>
+                  <input 
+                    type="number" 
+                    class="form-control" 
+                    id="price" 
+                    formControlName="price"
+                    [class.is-invalid]="productForm.get('price')?.invalid && productForm.get('price')?.touched"
+                  >
+                  <div class="invalid-feedback" *ngIf="productForm.get('price')?.invalid && productForm.get('price')?.touched">
+                    <div *ngIf="productForm.get('price')?.errors?.['required']">価格は必須です</div>
+                    <div *ngIf="productForm.get('price')?.errors?.['min']">価格は0以上で入力してください</div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label for="unit" class="form-label">単位 *</label>
+                  <input 
+                    type="text" 
+                    class="form-control" 
+                    id="unit" 
+                    formControlName="unit"
+                    [class.is-invalid]="productForm.get('unit')?.invalid && productForm.get('unit')?.touched"
+                  >
+                  <div class="invalid-feedback" *ngIf="productForm.get('unit')?.invalid && productForm.get('unit')?.touched">
+                    単位は必須です
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label for="minStock" class="form-label">最小在庫 *</label>
+                  <input 
+                    type="number" 
+                    class="form-control" 
+                    id="minStock" 
+                    formControlName="minStock"
+                    [class.is-invalid]="productForm.get('minStock')?.invalid && productForm.get('minStock')?.touched"
+                  >
+                  <div class="invalid-feedback" *ngIf="productForm.get('minStock')?.invalid && productForm.get('minStock')?.touched">
+                    <div *ngIf="productForm.get('minStock')?.errors?.['required']">最小在庫は必須です</div>
+                    <div *ngIf="productForm.get('minStock')?.errors?.['min']">最小在庫は0以上で入力してください</div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label for="maxStock" class="form-label">最大在庫 *</label>
+                  <input 
+                    type="number" 
+                    class="form-control" 
+                    id="maxStock" 
+                    formControlName="maxStock"
+                    [class.is-invalid]="productForm.get('maxStock')?.invalid && productForm.get('maxStock')?.touched"
+                  >
+                  <div class="invalid-feedback" *ngIf="productForm.get('maxStock')?.invalid && productForm.get('maxStock')?.touched">
+                    <div *ngIf="productForm.get('maxStock')?.errors?.['required']">最大在庫は必須です</div>
+                    <div *ngIf="productForm.get('maxStock')?.errors?.['min']">最大在庫は0以上で入力してください</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="description" class="form-label">説明</label>
+              <textarea 
+                class="form-control" 
+                id="description" 
+                rows="3" 
+                formControlName="description"
+                [class.is-invalid]="productForm.get('description')?.invalid && productForm.get('description')?.touched"
+              ></textarea>
+              <div class="invalid-feedback" *ngIf="productForm.get('description')?.invalid && productForm.get('description')?.touched">
+                <div *ngIf="productForm.get('description')?.errors?.['maxlength']">説明は500文字以内で入力してください</div>
+              </div>
+            </div>
+
+            <div class="d-grid gap-2">
+              <button type="submit" class="btn btn-primary" [disabled]="productForm.invalid">
+                <i class="fas fa-save me-1"></i>{{ isEditing ? '更新' : '登録' }}
+              </button>
+              <button type="button" class="btn btn-secondary" (click)="resetForm()">
+                <i class="fas fa-times me-1"></i>キャンセル
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- 商品一覧 -->
+    <div class="col-lg-8">
+      <div class="card shadow">
+        <div class="card-header">
+          <h6 class="m-0 font-weight-bold text-primary">商品一覧</h6>
+        </div>
+        <div class="card-body">
+          <!-- 検索・フィルター -->
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <input 
+                type="text" 
+                class="form-control" 
+                placeholder="商品名またはコードで検索..."
+                [(ngModel)]="searchTerm"
+              >
+            </div>
+            <div class="col-md-4">
+              <select class="form-select" [(ngModel)]="selectedCategory">
+                <option value="">すべてのカテゴリ</option>
+                <option *ngFor="let category of categories" [value]="category">{{ category }}</option>
+              </select>
+            </div>
+            <div class="col-md-2">
+              <button class="btn btn-outline-secondary w-100" (click)="searchTerm = ''; selectedCategory = ''">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- 商品テーブル -->
+          <div class="table-responsive">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>コード</th>
+                  <th>商品名</th>
+                  <th>カテゴリ</th>
+                  <th>価格</th>
+                  <th>単位</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let product of filteredProducts">
+                  <td><span class="badge bg-primary">{{ product.code }}</span></td>
+                  <td>
+                    <strong>{{ product.name }}</strong>
+                    <br>
+                    <small class="text-muted">{{ product.description }}</small>
+                  </td>
+                  <td><span class="badge bg-info">{{ product.category }}</span></td>
+                  <td>¥{{ product.price | number }}</td>
+                  <td>{{ product.unit }}</td>
+                  <td>
+                    <div class="btn-group" role="group">
+                      <button class="btn btn-sm btn-outline-primary" (click)="editProduct(product)">
+                        <i class="fas fa-edit"></i>
+                      </button>
+                      <button class="btn btn-sm btn-outline-danger" (click)="deleteProduct(product.id)">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+                <tr *ngIf="filteredProducts.length === 0">
+                  <td colspan="6" class="text-center text-muted">
+                    商品が見つかりません
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

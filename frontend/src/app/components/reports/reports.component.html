@@ -1,0 +1,410 @@
+<div class="container-fluid">
+  <div class="row mb-4">
+    <div class="col-12">
+      <h1 class="h3 mb-0">
+        <i class="fas fa-chart-bar me-2"></i>{{ title }}
+      </h1>
+      <p class="text-muted">各種レポートを生成・確認します</p>
+    </div>
+  </div>
+
+  <!-- 統計カード -->
+  <div class="row mb-4">
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="card border-left-primary shadow h-100 py-2">
+        <div class="card-body">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                総レポート数
+              </div>
+              <div class="h5 mb-0 font-weight-bold text-gray-800">{{ totalReports }}</div>
+            </div>
+            <div class="col-auto">
+              <i class="fas fa-file-alt fa-2x text-gray-300"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="card border-left-success shadow h-100 py-2">
+        <div class="card-body">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                準備完了
+              </div>
+              <div class="h5 mb-0 font-weight-bold text-gray-800">{{ readyReports }}</div>
+            </div>
+            <div class="col-auto">
+              <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="card border-left-warning shadow h-100 py-2">
+        <div class="card-body">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                生成中
+              </div>
+              <div class="h5 mb-0 font-weight-bold text-gray-800">{{ generatingReports }}</div>
+            </div>
+            <div class="col-auto">
+              <i class="fas fa-spinner fa-2x text-gray-300"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="card border-left-info shadow h-100 py-2">
+        <div class="card-body">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                レポート種類
+              </div>
+              <div class="h5 mb-0 font-weight-bold text-gray-800">{{ reportTypes.length }}</div>
+            </div>
+            <div class="col-auto">
+              <i class="fas fa-chart-pie fa-2x text-gray-300"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- レポート一覧 -->
+  <div class="row">
+    <div class="col-12">
+      <div class="card shadow">
+        <div class="card-header">
+          <h6 class="m-0 font-weight-bold text-primary">利用可能なレポート</h6>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-lg-6 mb-4" *ngFor="let report of filteredReports">
+              <div class="card h-100">
+                <div class="card-body">
+                  <div class="d-flex align-items-center mb-3">
+                    <div class="flex-shrink-0">
+                      <i [class]="getTypeIcon(report.type)" 
+                         class="fa-2x text-{{ getTypeColor(report.type) }} me-3"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                      <h6 class="card-title mb-1">{{ report.name }}</h6>
+                      <p class="card-text text-muted small mb-0">{{ report.description }}</p>
+                    </div>
+                  </div>
+                  
+                  <div class="row mb-3">
+                    <div class="col-6">
+                      <small class="text-muted">最終生成:</small><br>
+                      <span class="text-sm">{{ report.lastGenerated | date:'short' }}</span>
+                    </div>
+                    <div class="col-6">
+                      <small class="text-muted">状態:</small><br>
+                      <span class="badge bg-{{ getStatusClass(report.status) }}">
+                        {{ getStatusText(report.status) }}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <div class="d-grid gap-2">
+                    <button class="btn btn-primary btn-sm" 
+                            (click)="generateReport(report)"
+                            [disabled]="report.status === 'generating'">
+                      <i class="fas fa-sync-alt me-1" *ngIf="report.status === 'generating'"></i>
+                      <i class="fas fa-play me-1" *ngIf="report.status !== 'generating'"></i>
+                      {{ report.status === 'generating' ? '生成中...' : '生成' }}
+                    </button>
+                    <div class="btn-group" role="group" *ngIf="report.status === 'ready'">
+                      <button class="btn btn-outline-secondary btn-sm" (click)="viewReport(report)">
+                        <i class="fas fa-eye me-1"></i>表示
+                      </button>
+                      <button class="btn btn-outline-secondary btn-sm" (click)="exportReport(report)">
+                        <i class="fas fa-download me-1"></i>エクスポート
+                      </button>
+                      <button class="btn btn-outline-secondary btn-sm" (click)="printReport(report)">
+                        <i class="fas fa-print me-1"></i>印刷
+                      </button>
+                    </div>
+                    <button class="btn btn-outline-info btn-sm" (click)="scheduleReport(report)">
+                      <i class="fas fa-clock me-1"></i>定期生成設定
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- レポートビューアーモーダル -->
+  <div class="modal fade show" 
+       [style.display]="showReportViewer ? 'block' : 'none'" 
+       tabindex="-1"
+       [class.d-block]="showReportViewer">
+    <div class="modal-dialog modal-xl">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">
+            <i [class]="getTypeIcon(selectedReport?.type)" 
+               class="text-{{ getTypeColor(selectedReport?.type) }} me-2"></i>
+            {{ selectedReport?.name }}
+          </h5>
+          <button type="button" class="btn-close" (click)="closeReportViewer()"></button>
+        </div>
+        <div class="modal-body">
+          <!-- エクスポートオプション -->
+          <div class="row mb-3" *ngIf="showExportOptions">
+            <div class="col-12">
+              <div class="card border-info">
+                <div class="card-header bg-info text-white">
+                  <h6 class="mb-0"><i class="fas fa-download me-2"></i>エクスポート形式を選択</h6>
+                </div>
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col-md-8">
+                      <div class="btn-group" role="group">
+                        <button *ngFor="let format of exportFormats" 
+                                type="button" 
+                                class="btn btn-outline-primary"
+                                [class.active]="selectedFormat === format.value"
+                                (click)="selectedFormat = format.value">
+                          <i [class]="format.icon" class="me-2"></i>{{ format.label }}
+                        </button>
+                      </div>
+                    </div>
+                    <div class="col-md-4 text-end">
+                      <button class="btn btn-success" (click)="downloadReport(selectedFormat)">
+                        <i class="fas fa-download me-2"></i>ダウンロード
+                      </button>
+                      <button class="btn btn-secondary ms-2" (click)="showExportOptions = false">
+                        <i class="fas fa-times me-2"></i>キャンセル
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row mb-3" *ngIf="selectedReport">
+            <div class="col-md-6">
+              <strong>説明:</strong> {{ selectedReport.description }}
+            </div>
+            <div class="col-md-6 text-end">
+              <strong>最終生成:</strong> {{ selectedReport.lastGenerated | date:'full' }}
+            </div>
+          </div>
+          
+          <!-- ローディング表示 -->
+          <div class="text-center py-5" *ngIf="isLoading">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">読み込み中...</span>
+            </div>
+            <p class="mt-3 text-muted">レポートデータを読み込み中...</p>
+          </div>
+          
+          <!-- レポートデータ表示 -->
+          <div #reportContent *ngIf="!isLoading && currentReportData">
+            <!-- 在庫サマリー -->
+            <div *ngIf="currentReportData.reportType === 'inventory_summary'" class="mb-4">
+              <h6>在庫サマリー</h6>
+              <div class="row">
+                <div class="col-md-3">
+                  <div class="card bg-primary text-white">
+                    <div class="card-body text-center">
+                      <h4>{{ currentReportData.totalProducts }}</h4>
+                      <small>総商品数</small>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-3">
+                  <div class="card bg-success text-white">
+                    <div class="card-body text-center">
+                      <h4>{{ currentReportData.totalQuantity }}</h4>
+                      <small>総在庫数</small>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-3">
+                  <div class="card bg-info text-white">
+                    <div class="card-body text-center">
+                      <h4>{{ currentReportData.totalValue | number }}</h4>
+                      <small>総価値 (円)</small>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-3">
+                  <div class="card bg-warning text-white">
+                    <div class="card-body text-center">
+                      <h4>{{ currentReportData.lowStockItems }}</h4>
+                      <small>低在庫商品</small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 在庫詳細 -->
+            <div *ngIf="currentReportData.items" class="mb-4">
+              <h6>在庫詳細</h6>
+              <div class="table-responsive">
+                <table class="table table-striped table-bordered">
+                  <thead class="table-dark">
+                    <tr>
+                      <th>商品名</th>
+                      <th>カテゴリ</th>
+                      <th>在庫数</th>
+                      <th>単価</th>
+                      <th>倉庫</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let item of currentReportData.items">
+                      <td>{{ item.productName }}</td>
+                      <td>{{ item.category }}</td>
+                      <td>{{ item.quantity }}</td>
+                      <td>{{ item.unitPrice | number }}</td>
+                      <td>{{ item.warehouse }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- 取引履歴 -->
+            <div *ngIf="currentReportData.transactions" class="mb-4">
+              <h6>取引履歴</h6>
+              <div class="table-responsive">
+                <table class="table table-striped table-bordered">
+                  <thead class="table-dark">
+                    <tr>
+                      <th>取引ID</th>
+                      <th>取引タイプ</th>
+                      <th>商品名</th>
+                      <th>数量</th>
+                      <th>取引日</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let transaction of currentReportData.transactions">
+                      <td>{{ transaction.transactionId }}</td>
+                      <td>
+                        <span class="badge" 
+                              [class.bg-success]="transaction.type === '入庫'"
+                              [class.bg-danger]="transaction.type === '出庫'">
+                          {{ transaction.type }}
+                        </span>
+                      </td>
+                      <td>{{ transaction.productName }}</td>
+                      <td>{{ transaction.quantity }}</td>
+                      <td>{{ transaction.date }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- 低在庫アラート -->
+            <div *ngIf="currentReportData.alerts" class="mb-4">
+              <h6>低在庫アラート</h6>
+              <div class="table-responsive">
+                <table class="table table-striped table-bordered">
+                  <thead class="table-dark">
+                    <tr>
+                      <th>商品名</th>
+                      <th>現在在庫数</th>
+                      <th>最小在庫数</th>
+                      <th>ステータス</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let alert of currentReportData.alerts">
+                      <td>{{ alert.productName }}</td>
+                      <td>{{ alert.currentStock }}</td>
+                      <td>{{ alert.minStock }}</td>
+                      <td>
+                        <span class="badge" 
+                              [class.bg-warning]="alert.status === '低在庫'"
+                              [class.bg-danger]="alert.status === '在庫切れ'">
+                          {{ alert.status }}
+                        </span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          
+          <!-- チャート表示エリア -->
+          <div class="chart-container" *ngIf="currentChartData && !isLoading">
+            <div class="text-center mb-3">
+              <h6>データ可視化</h6>
+              <p class="text-muted">このレポートのデータをグラフで表示しています</p>
+            </div>
+            
+            <!-- チャートデータの表示（実際の実装ではChart.jsなどを使用） -->
+            <div class="alert alert-info">
+              <i class="fas fa-info-circle me-2"></i>
+              チャート表示機能は開発中です。現在はデータ構造のみ表示しています。
+            </div>
+            
+            <div class="row">
+              <div class="col-md-6">
+                <h6>ラベル:</h6>
+                <ul class="list-group">
+                  <li class="list-group-item" *ngFor="let label of currentChartData.labels">
+                    {{ label }}
+                  </li>
+                </ul>
+              </div>
+              <div class="col-md-6">
+                <h6>データセット:</h6>
+                <div *ngFor="let dataset of currentChartData.datasets; let i = index">
+                  <h6 class="text-sm">{{ dataset.label }}</h6>
+                  <p class="text-muted">データ数: {{ dataset.data.length }}</p>
+                  <p class="text-muted">サンプル値: {{ dataset.data.slice(0, 3).join(', ') }}...</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closeReportViewer()">
+            <i class="fas fa-times me-1"></i>閉じる
+          </button>
+          <button type="button" class="btn btn-primary" 
+                  (click)="exportReport(selectedReport!)" 
+                  *ngIf="selectedReport">
+            <i class="fas fa-download me-1"></i>エクスポート
+          </button>
+          <button type="button" class="btn btn-success" 
+                  (click)="printReport(selectedReport!)" 
+                  *ngIf="selectedReport">
+            <i class="fas fa-print me-1"></i>印刷
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- モーダル背景 -->
+  <div class="modal-backdrop fade show" 
+       *ngIf="showReportViewer" 
+       (click)="closeReportViewer()"></div>
+</div>

@@ -118,6 +118,32 @@ public class ReportController {
     }
     
     /**
+     * CSVレポートダウンロード
+     */
+    @GetMapping("/download/{reportType}/csv")
+    public ResponseEntity<byte[]> downloadCsvReport(
+            @PathVariable String reportType,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            @RequestParam(required = false) Long warehouseId) {
+        log.info("Downloading CSV report - type: {}, startDate: {}, endDate: {}, warehouseId: {}", 
+                reportType, startDate, endDate, warehouseId);
+        
+        try {
+            byte[] reportData = reportService.generateCsvReport(reportType, startDate, endDate, warehouseId);
+            String filename = String.format("%s_report_%s.csv", reportType, LocalDate.now());
+            
+            return ResponseEntity.ok()
+                    .header("Content-Disposition", "attachment; filename=" + filename)
+                    .header("Content-Type", "text/csv; charset=UTF-8")
+                    .body(reportData);
+        } catch (Exception e) {
+            log.error("Failed to generate CSV report", e);
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+    
+    /**
      * レポートをExcel形式でダウンロード
      */
     @GetMapping("/download/{reportType}")

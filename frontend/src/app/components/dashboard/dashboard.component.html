@@ -1,0 +1,104 @@
+<div class="dashboard-container">
+  <!-- ヘッダー -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <h1 class="h3 mb-0">
+        <i class="fas fa-tachometer-alt me-2"></i>ダッシュボード
+      </h1>
+      <p class="text-muted">システムの概要と重要な指標を確認できます</p>
+    </div>
+  </div>
+
+  <!-- 統計カード -->
+  <div class="row mb-4">
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="card border-left-primary shadow h-100 py-2">
+        <div class="card-body">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                総商品数
+              </div>
+              <div class="h5 mb-0 font-weight-bold text-gray-800">{{ dashboardData.totalProducts }}</div>
+            </div>
+            <div class="col-auto">
+              <i class="fas fa-box fa-2x text-gray-300"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="card border-left-warning shadow h-100 py-2">
+        <div class="card-body">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                低在庫アラート
+              </div>
+              <div class="h5 mb-0 font-weight-bold text-gray-800">{{ dashboardData.lowStockItems }}</div>
+            </div>
+            <div class="col-auto">
+              <i class="fas fa-exclamation-triangle fa-2x text-gray-300"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="card border-left-info shadow h-100 py-2">
+        <div class="card-body">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                今日の取引
+              </div>
+              <div class="h5 mb-0 font-weight-bold text-gray-800">{{ dashboardData.todayTransactions }}</div>
+            </div>
+            <div class="col-auto">
+              <i class="fas fa-exchange-alt fa-2x text-gray-300"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="card border-left-success shadow h-100 py-2">
+        <div class="card-body">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                月間売上
+              </div>
+              <div class="h5 mb-0 font-weight-bold text-gray-800">¥{{ dashboardData.monthlyRevenue | number }}</div>
+            </div>
+            <div class="col-auto">
+              <i class="fas fa-yen-sign fa-2x text-gray-300"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- システム状態 -->
+  <div class="row">
+    <div class="col-12">
+      <div class="card shadow">
+        <div class="card-header">
+          <h6 class="m-0 font-weight-bold text-primary">システム状態</h6>
+        </div>
+        <div class="card-body">
+          <div class="alert alert-success" role="alert">
+            <i class="fas fa-check-circle me-2"></i>
+            システムは正常に動作しています
+          </div>
+          <p class="text-muted">すべてのサービスが正常に稼働中です。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,368 @@
+<div class="container-fluid">
+  <div class="row mb-4">
+    <div class="col-12">
+      <h1 class="h3 mb-0">
+        <i class="fas fa-exchange-alt me-2"></i>{{ title }}
+      </h1>
+      <p class="text-muted">入出庫の履歴を確認し、新しい入出庫を記録します</p>
+    </div>
+  </div>
+
+  <!-- 統計カード -->
+  <div class="row mb-4">
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="card border-left-info shadow h-100 py-2">
+        <div class="card-body">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                今日の取引
+              </div>
+              <div class="h5 mb-0 font-weight-bold text-gray-800">{{ todayTransactions }}</div>
+            </div>
+            <div class="col-auto">
+              <i class="fas fa-calendar-day fa-2x text-gray-300"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="card border-left-success shadow h-100 py-2">
+        <div class="card-body">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                総入庫数
+              </div>
+              <div class="h5 mb-0 font-weight-bold text-gray-800">{{ totalInQuantity }}</div>
+            </div>
+            <div class="col-auto">
+              <i class="fas fa-arrow-down fa-2x text-gray-300"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="card border-left-danger shadow h-100 py-2">
+        <div class="card-body">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                総出庫数
+              </div>
+              <div class="h5 mb-0 font-weight-bold text-gray-800">{{ totalOutQuantity }}</div>
+            </div>
+            <div class="col-auto">
+              <i class="fas fa-arrow-up fa-2x text-gray-300"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="card border-left-primary shadow h-100 py-2">
+        <div class="card-body">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                総取引数
+              </div>
+              <div class="h5 mb-0 font-weight-bold text-gray-800">{{ transactions.length }}</div>
+            </div>
+            <div class="col-auto">
+              <i class="fas fa-list fa-2x text-gray-300"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 新規取引登録ボタン -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <button class="btn btn-primary" (click)="showForm = !showForm">
+        <i class="fas fa-plus me-2"></i>{{ showForm ? 'フォームを隠す' : '新規取引登録' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- 新規取引登録フォーム -->
+  <div class="row mb-4" *ngIf="showForm">
+    <div class="col-12">
+      <div class="card shadow">
+        <div class="card-header">
+          <h6 class="m-0 font-weight-bold text-primary">新規取引登録</h6>
+        </div>
+        <div class="card-body">
+          <form [formGroup]="transactionForm" (ngSubmit)="onSubmit()">
+            <div class="row">
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label for="productId" class="form-label">商品 *</label>
+                  <select 
+                    class="form-select" 
+                    id="productId" 
+                    formControlName="productId"
+                    [class.is-invalid]="transactionForm.get('productId')?.invalid && transactionForm.get('productId')?.touched"
+                  >
+                    <option value="">商品を選択</option>
+                    <option *ngFor="let product of products" [value]="product.id">
+                      {{ product.code }} - {{ product.name }} (現在在庫: {{ product.currentStock }}{{ product.unit }})
+                    </option>
+                  </select>
+                  <div class="invalid-feedback" *ngIf="transactionForm.get('productId')?.invalid && transactionForm.get('productId')?.touched">
+                    商品は必須です
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label for="type" class="form-label">取引種別 *</label>
+                  <select 
+                    class="form-select" 
+                    id="type" 
+                    formControlName="type"
+                    [class.is-invalid]="transactionForm.get('type')?.invalid && transactionForm.get('type')?.touched"
+                  >
+                    <option value="">取引種別を選択</option>
+                    <option *ngFor="let type of transactionTypes" [value]="type.value">
+                      {{ type.label }}
+                    </option>
+                  </select>
+                  <div class="invalid-feedback" *ngIf="transactionForm.get('type')?.invalid && transactionForm.get('type')?.touched">
+                    取引種別は必須です
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-4">
+                <div class="mb-3">
+                  <label for="quantity" class="form-label">数量 *</label>
+                  <input 
+                    type="number" 
+                    class="form-control" 
+                    id="quantity" 
+                    formControlName="quantity"
+                    [class.is-invalid]="transactionForm.get('quantity')?.invalid && transactionForm.get('quantity')?.touched"
+                  >
+                  <div class="invalid-feedback" *ngIf="transactionForm.get('quantity')?.invalid && transactionForm.get('quantity')?.touched">
+                    <div *ngIf="transactionForm.get('quantity')?.errors?.['required']">数量は必須です</div>
+                    <div *ngIf="transactionForm.get('quantity')?.errors?.['min']">数量は1以上で入力してください</div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="mb-3">
+                  <label for="location" class="form-label">場所 *</label>
+                  <select 
+                    class="form-select" 
+                    id="location" 
+                    formControlName="location"
+                    [class.is-invalid]="transactionForm.get('location')?.invalid && transactionForm.get('location')?.touched"
+                  >
+                    <option value="">場所を選択</option>
+                    <option *ngFor="let location of locations" [value]="location">{{ location }}</option>
+                  </select>
+                  <div class="invalid-feedback" *ngIf="transactionForm.get('location')?.invalid && transactionForm.get('location')?.touched">
+                    場所は必須です
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="mb-3">
+                  <label for="transactionDate" class="form-label">取引日時 *</label>
+                  <input 
+                    type="datetime-local" 
+                    class="form-control" 
+                    id="transactionDate" 
+                    formControlName="transactionDate"
+                    [class.is-invalid]="transactionForm.get('transactionDate')?.invalid && transactionForm.get('transactionDate')?.touched"
+                  >
+                  <div class="invalid-feedback" *ngIf="transactionForm.get('transactionDate')?.invalid && transactionForm.get('transactionDate')?.touched">
+                    取引日時は必須です
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label for="reason" class="form-label">理由 *</label>
+                  <select 
+                    class="form-select" 
+                    id="reason" 
+                    formControlName="reason"
+                    [class.is-invalid]="transactionForm.get('reason')?.invalid && transactionForm.get('reason')?.touched"
+                  >
+                    <option value="">理由を選択</option>
+                    <option *ngFor="let reason of reasons" [value]="reason">{{ reason }}</option>
+                  </select>
+                  <div class="invalid-feedback" *ngIf="transactionForm.get('reason')?.invalid && transactionForm.get('reason')?.touched">
+                    理由は必須です
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label for="operator" class="form-label">担当者 *</label>
+                  <select 
+                    class="form-select" 
+                    id="operator" 
+                    formControlName="operator"
+                    [class.is-invalid]="transactionForm.get('operator')?.invalid && transactionForm.get('operator')?.touched"
+                  >
+                    <option value="">担当者を選択</option>
+                    <option *ngFor="let operator of operators" [value]="operator">{{ operator }}</option>
+                  </select>
+                  <div class="invalid-feedback" *ngIf="transactionForm.get('operator')?.invalid && transactionForm.get('operator')?.touched">
+                    担当者は必須です
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="notes" class="form-label">備考</label>
+              <textarea 
+                class="form-control" 
+                id="notes" 
+                rows="3" 
+                formControlName="notes"
+                placeholder="取引に関する追加情報があれば入力してください"
+              ></textarea>
+            </div>
+
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+              <button type="button" class="btn btn-secondary me-md-2" (click)="resetForm()">
+                <i class="fas fa-times me-1"></i>リセット
+              </button>
+              <button type="submit" class="btn btn-primary" [disabled]="transactionForm.invalid">
+                <i class="fas fa-save me-1"></i>登録
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 取引履歴 -->
+  <div class="card shadow">
+    <div class="card-header">
+      <div class="row align-items-center">
+        <div class="col">
+          <h6 class="m-0 font-weight-bold text-primary">取引履歴</h6>
+        </div>
+        <div class="col-auto">
+          <div class="btn-group" role="group">
+            <button class="btn btn-outline-secondary btn-sm" (click)="exportTransactions()">
+              <i class="fas fa-download me-1"></i>エクスポート
+            </button>
+            <button class="btn btn-outline-secondary btn-sm" (click)="printTransactions()">
+              <i class="fas fa-print me-1"></i>印刷
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <!-- 検索・フィルター -->
+      <div class="row mb-3">
+        <div class="col-md-3">
+          <input 
+            type="text" 
+            class="form-control" 
+            placeholder="商品名、コード、担当者で検索..."
+            [(ngModel)]="searchTerm"
+          >
+        </div>
+        <div class="col-md-2">
+          <select class="form-select" [(ngModel)]="selectedType">
+            <option value="">すべての種別</option>
+            <option *ngFor="let type of transactionTypes" [value]="type.value">
+              {{ type.label }}
+            </option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <select class="form-select" [(ngModel)]="selectedProduct">
+            <option value="">すべての商品</option>
+            <option *ngFor="let product of products" [value]="product.id">
+              {{ product.code }}
+            </option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <select class="form-select" [(ngModel)]="selectedDateRange">
+            <option value="">すべての期間</option>
+            <option value="today">今日</option>
+            <option value="yesterday">昨日</option>
+            <option value="week">過去1週間</option>
+            <option value="month">過去1ヶ月</option>
+          </select>
+        </div>
+        <div class="col-md-1">
+          <button class="btn btn-outline-secondary w-100" (click)="clearFilters()">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- 取引テーブル -->
+      <div class="table-responsive">
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>日時</th>
+              <th>商品コード</th>
+              <th>商品名</th>
+              <th>種別</th>
+              <th>数量</th>
+              <th>場所</th>
+              <th>理由</th>
+              <th>担当者</th>
+              <th>備考</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let transaction of filteredTransactions">
+              <td>{{ transaction.transactionDate | date:'short' }}</td>
+              <td><span class="badge bg-primary">{{ transaction.productCode }}</span></td>
+              <td><strong>{{ transaction.productName }}</strong></td>
+              <td>
+                <span class="badge bg-{{ getTypeClass(transaction.type) }}">
+                  {{ getTypeText(transaction.type) }}
+                </span>
+              </td>
+              <td>
+                <span class="fw-bold">{{ transaction.quantity }}</span>
+                <small class="text-muted">{{ transaction.unit }}</small>
+              </td>
+              <td>{{ transaction.location }}</td>
+              <td>{{ transaction.reason }}</td>
+              <td>{{ transaction.operator }}</td>
+              <td>
+                <small class="text-muted" *ngIf="transaction.notes">{{ transaction.notes }}</small>
+                <span class="text-muted" *ngIf="!transaction.notes">-</span>
+              </td>
+            </tr>
+            <tr *ngIf="filteredTransactions.length === 0">
+              <td colspan="9" class="text-center text-muted">
+                取引履歴が見つかりません
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

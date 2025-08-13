@@ -1,0 +1,222 @@
+<div class="container-fluid">
+  <div class="row mb-4">
+    <div class="col-12">
+      <h1 class="h3 mb-0">
+        <i class="fas fa-warehouse me-2"></i>{{ title }}
+      </h1>
+      <p class="text-muted">在庫の確認と管理を行います</p>
+    </div>
+  </div>
+
+  <!-- 統計カード -->
+  <div class="row mb-4">
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="card border-left-primary shadow h-100 py-2">
+        <div class="card-body">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                総商品数
+              </div>
+              <div class="h5 mb-0 font-weight-bold text-gray-800">{{ totalItems }}</div>
+            </div>
+            <div class="col-auto">
+              <i class="fas fa-boxes fa-2x text-gray-300"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="card border-left-warning shadow h-100 py-2">
+        <div class="card-body">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                低在庫アラート
+              </div>
+              <div class="h5 mb-0 font-weight-bold text-gray-800">{{ lowStockItems }}</div>
+            </div>
+            <div class="col-auto">
+              <i class="fas fa-exclamation-triangle fa-2x text-gray-300"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="card border-left-danger shadow h-100 py-2">
+        <div class="card-body">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                在庫切れ
+              </div>
+              <div class="h5 mb-0 font-weight-bold text-gray-800">{{ outOfStockItems }}</div>
+            </div>
+            <div class="col-auto">
+              <i class="fas fa-times-circle fa-2x text-gray-300"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="card border-left-info shadow h-100 py-2">
+        <div class="card-body">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                総在庫価値
+              </div>
+              <div class="h5 mb-0 font-weight-bold text-gray-800">¥{{ totalValue | number }}</div>
+            </div>
+            <div class="col-auto">
+              <i class="fas fa-yen-sign fa-2x text-gray-300"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 在庫一覧 -->
+  <div class="card shadow">
+    <div class="card-header">
+      <div class="row align-items-center">
+        <div class="col">
+          <h6 class="m-0 font-weight-bold text-primary">在庫一覧</h6>
+        </div>
+        <div class="col-auto">
+          <div class="btn-group" role="group">
+            <button class="btn btn-outline-secondary btn-sm" (click)="exportInventory()">
+              <i class="fas fa-download me-1"></i>エクスポート
+            </button>
+            <button class="btn btn-outline-secondary btn-sm" (click)="printInventory()">
+              <i class="fas fa-print me-1"></i>印刷
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <!-- 検索・フィルター -->
+      <div class="row mb-3">
+        <div class="col-md-3">
+          <input 
+            type="text" 
+            class="form-control" 
+            placeholder="商品名またはコードで検索..."
+            [(ngModel)]="searchTerm"
+          >
+        </div>
+        <div class="col-md-2">
+          <select class="form-select" [(ngModel)]="selectedCategory">
+            <option value="">すべてのカテゴリ</option>
+            <option *ngFor="let category of categories" [value]="category">{{ category }}</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <select class="form-select" [(ngModel)]="selectedStatus">
+            <option value="">すべての状態</option>
+            <option value="normal">正常</option>
+            <option value="low">低在庫</option>
+            <option value="overstock">過剰在庫</option>
+            <option value="out">在庫切れ</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <select class="form-select" [(ngModel)]="selectedLocation">
+            <option value="">すべての場所</option>
+            <option *ngFor="let location of locations" [value]="location">{{ location }}</option>
+          </select>
+        </div>
+        <div class="col-md-1">
+          <button class="btn btn-outline-secondary w-100" (click)="clearFilters()">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- 在庫テーブル -->
+      <div class="table-responsive">
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>商品コード</th>
+              <th>商品名</th>
+              <th>カテゴリ</th>
+              <th>現在在庫</th>
+              <th>最小在庫</th>
+              <th>最大在庫</th>
+              <th>単位</th>
+              <th>場所</th>
+              <th>状態</th>
+              <th>最終更新</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of filteredInventory">
+              <td><span class="badge bg-primary">{{ item.productCode }}</span></td>
+              <td>
+                <strong>{{ item.productName }}</strong>
+              </td>
+              <td><span class="badge bg-info">{{ item.category }}</span></td>
+              <td>
+                <span class="fw-bold" [class.text-danger]="item.currentStock === 0">
+                  {{ item.currentStock }}
+                </span>
+              </td>
+              <td>{{ item.minStock }}</td>
+              <td>{{ item.maxStock }}</td>
+              <td>{{ item.unit }}</td>
+              <td>{{ item.location }}</td>
+              <td>
+                <span class="badge bg-{{ getStatusClass(item.status) }}">
+                  {{ getStatusText(item.status) }}
+                </span>
+              </td>
+              <td>{{ item.lastUpdated | date:'short' }}</td>
+            </tr>
+            <tr *ngIf="filteredInventory.length === 0">
+              <td colspan="10" class="text-center text-muted">
+                在庫データが見つかりません
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 在庫状況サマリー -->
+      <div class="row mt-4">
+        <div class="col-md-6">
+          <div class="card border-left-success">
+            <div class="card-body">
+              <h6 class="card-title text-success">
+                <i class="fas fa-check-circle me-2"></i>正常在庫
+              </h6>
+              <p class="card-text">
+                現在 {{ normalStockItems }} 商品が正常な在庫レベルを維持しています。
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="card border-left-warning">
+            <div class="card-body">
+              <h6 class="card-title text-warning">
+                <i class="fas fa-exclamation-triangle me-2"></i>注意が必要
+              </h6>
+              <p class="card-text">
+                低在庫: {{ lowStockItems }}件、在庫切れ: {{ outOfStockItems }}件、過剰在庫: {{ overstockItems }}件
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
