@@ -1,0 +1,13 @@
+{
+  "$schema": "https://railway.app/railway.schema.json",
+  "build": {
+    "builder": "GRADLE"
+  },
+  "deploy": {
+    "startCommand": "java -jar build/libs/inventory-service-1.0.0.jar",
+    "healthcheckPath": "/api/v1/inventories/health",
+    "healthcheckTimeout": 300,
+    "restartPolicyType": "ON_FAILURE",
+    "restartPolicyMaxRetries": 10
+  }
+}
