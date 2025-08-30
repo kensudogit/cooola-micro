@@ -1,22 +1,36 @@
-FROM openjdk:17-jdk-slim
+# マルチステージビルド: ビルドステージ
+FROM openjdk:17-jdk-slim AS builder
 
 WORKDIR /app
 
-# Gradle Wrapperとソースコードをコピー
+# Gradle Wrapperとビルド設定をコピー
 COPY gradlew .
 COPY gradle gradle
 COPY build.gradle .
-COPY src src
+COPY settings.gradle .
 
 # 実行権限を付与
 RUN chmod +x gradlew
 
-# 依存関係をダウンロード
+# 依存関係をダウンロード（キャッシュレイヤー）
 RUN ./gradlew dependencies --no-daemon
+
+# ソースコードをコピー
+COPY src src
 
 # アプリケーションをビルド
 RUN ./gradlew build -x test --no-daemon
 
-# JARファイルを実行
+# 実行ステージ
+FROM openjdk:17-jre-slim
+
+WORKDIR /app
+
+# ビルドされたJARファイルをコピー
+COPY --from=builder /app/build/libs/inventory-service-1.0.0.jar app.jar
+
+# ヘルスチェック用のポートを公開
 EXPOSE 8080
-CMD ["java", "-jar", "build/libs/inventory-service-1.0.0.jar"]
+
+# アプリケーション起動
+CMD ["java", "-jar", "app.jar"]

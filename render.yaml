@@ -1,18 +1,21 @@
 services:
   - type: web
     name: inventory-service-crud
-    env: java
+    env: docker
     plan: free
-    buildCommand: ./gradlew build
-    startCommand: java -jar build/libs/inventory-service-1.0.0.jar
+    region: oregon
+    healthCheckPath: /api/v1/inventories/health
     envVars:
       - key: PORT
         value: 8080
       - key: SPRING_PROFILES_ACTIVE
         value: render
-    healthCheckPath: /api/v1/inventories/health
+      - key: JAVA_OPTS
+        value: "-Xmx512m -Xms256m"
+    autoDeploy: true
 
 databases:
   - name: inventory-db
     databaseName: inventory
     user: inventory_user
+    plan: free
