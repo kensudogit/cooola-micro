@@ -1,7 +1,15 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ProductService, Product } from '../../services/product.service';
+
+interface Product {
+  code: string;
+  name: string;
+  category: string;
+  price: number;
+  stockQuantity: number;
+  status: string;
+}
 
 @Component({
   selector: 'app-products',
@@ -60,15 +68,15 @@ import { ProductService, Product } from '../../services/product.service';
                   <td>{{ product.code }}</td>
                   <td>{{ product.name }}</td>
                   <td>{{ product.category }}</td>
-                                     <td>¥{{ product.price | number }}</td>
-                   <td>
-                     <span [class]="'badge ' + getStockLevelClass(product.stockQuantity)">
-                       {{ product.stockQuantity }}
-                     </span>
-                   </td>
+                  <td>¥{{ product.price | number }}</td>
                   <td>
-                    <span [class]="'badge ' + getStatusClass(product.status)">
-                      {{ product.status }}
+                    <span [class]="'badge ' + getStockLevelClass(product.stockQuantity)">
+                      {{ product.stockQuantity }}
+                    </span>
+                  </td>
+                  <td>
+                    <span [class]="'badge ' + getStatusClass(product.status || '')">
+                      {{ getStatusText(product.status || '') }}
                     </span>
                   </td>
                   <td>
@@ -118,29 +126,21 @@ export class ProductsComponent implements OnInit {
   products: Product[] = [];
   searchTerm = '';
 
-  constructor(private productService: ProductService) {}
+  constructor() {}
 
   ngOnInit() {
     this.loadProducts();
   }
 
   private loadProducts() {
-    this.productService.getProducts().subscribe({
-      next: (products) => {
-        this.products = products;
-      },
-      error: (error) => {
-        console.error('商品の取得に失敗しました:', error);
-        // エラー時のフォールバックデータ
-        this.products = [
-          { code: 'PC001', name: 'ノートPC', category: '電子機器', price: 80000, stockQuantity: 25, status: 'ACTIVE' },
-          { code: 'PH001', name: 'スマートフォン', category: '電子機器', price: 50000, stockQuantity: 15, status: 'ACTIVE' },
-          { code: 'TB001', name: 'タブレット', category: '電子機器', price: 30000, stockQuantity: 8, status: 'ACTIVE' },
-          { code: 'KB001', name: 'キーボード', category: 'アクセサリ', price: 5000, stockQuantity: 50, status: 'ACTIVE' },
-          { code: 'MS001', name: 'マウス', category: 'アクセサリ', price: 3000, stockQuantity: 100, status: 'ACTIVE' }
-        ];
-      }
-    });
+    // サンプルデータ
+    this.products = [
+      { code: 'PC001', name: 'ノートPC', category: '電子機器', price: 80000, stockQuantity: 25, status: 'ACTIVE' },
+      { code: 'PH001', name: 'スマートフォン', category: '電子機器', price: 50000, stockQuantity: 15, status: 'ACTIVE' },
+      { code: 'TB001', name: 'タブレット', category: '電子機器', price: 30000, stockQuantity: 8, status: 'ACTIVE' },
+      { code: 'KB001', name: 'キーボード', category: 'アクセサリ', price: 5000, stockQuantity: 50, status: 'ACTIVE' },
+      { code: 'MS001', name: 'マウス', category: 'アクセサリ', price: 3000, stockQuantity: 100, status: 'ACTIVE' }
+    ];
   }
 
   get filteredProducts(): Product[] {
@@ -167,17 +167,25 @@ export class ProductsComponent implements OnInit {
     }
   }
 
+  getStatusText(status: string): string {
+    switch (status) {
+      case 'ACTIVE': return '有効';
+      case 'INACTIVE': return '無効';
+      default: return '不明';
+    }
+  }
+
   openAddModal() {
     // 新規商品登録モーダルを開く
     console.log('新規商品登録モーダルを開く');
   }
 
-  editProduct(product: any) {
+  editProduct(product: Product) {
     // 商品編集モーダルを開く
     console.log('商品編集:', product);
   }
 
-  deleteProduct(product: any) {
+  deleteProduct(product: Product) {
     // 商品削除確認
     if (confirm(`商品「${product.name}」を削除しますか？`)) {
       console.log('商品削除:', product);

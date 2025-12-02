@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: inventory-service-crud
+    env: docker
+    plan: free
+    region: oregon
+    healthCheckPath: /api/v1/inventories/health
+    envVars:
+      - key: PORT
+        value: 8080
+      - key: SPRING_PROFILES_ACTIVE
+        value: render
+      - key: JAVA_OPTS
+        value: "-Xmx512m -Xms256m"
+    autoDeploy: true
+
+databases:
+  - name: inventory-db
+    databaseName: inventory
+    user: inventory_user
+    plan: free

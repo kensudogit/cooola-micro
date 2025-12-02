@@ -39,6 +39,15 @@ dependencyManagement {
     }
 }
 
+// core-api はライブラリプロジェクトのため、bootJar を無効化
+tasks.named('bootJar') {
+    enabled = false
+}
+
+tasks.named('jar') {
+    enabled = true
+}
+
 test {
     useJUnitPlatform()
 } 

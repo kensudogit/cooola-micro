@@ -1,0 +1,21 @@
+{
+  "version": 2,
+  "buildCommand": "npm run vercel-build",
+  "outputDirectory": "dist/cooola-micro-frontend",
+  "rewrites": [
+    {
+      "source": "/assets/(.*)",
+      "destination": "/dist/cooola-micro-frontend/assets/$1"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/dist/cooola-micro-frontend/index.html"
+    }
+  ],
+  "env": {
+    "NODE_ENV": "production",
+    "VERCEL_PUBLIC": "true",
+    "VERCEL_PROTECTION_BYPASS": "true"
+  },
+  "public": true
+}
