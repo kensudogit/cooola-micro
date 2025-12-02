@@ -1,0 +1,13 @@
+// plugins ディレクトリは親ディレクトリであり、プロジェクトではない
+// このファイルは、Gradle が plugins をプロジェクトとして認識するのを防ぐため
+
+// bootJar タスクを無効化
+tasks.named('bootJar') {
+    enabled = false
+}
+
+// jar タスクは有効のまま（通常のJARを作成）
+tasks.named('jar') {
+    enabled = true
+}
+
