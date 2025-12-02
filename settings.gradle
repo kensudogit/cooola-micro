@@ -1,5 +1,6 @@
 rootProject.name = 'cooola-micro'
 
+// core ディレクトリをプロジェクトとして認識させないように除外
 // Core modules
 include 'core:core-api'
 include 'core:core-impl'
