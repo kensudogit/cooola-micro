@@ -54,6 +54,10 @@ yarn-error.log*
 *.swo
 *~
 
+# Temporary batch files
+clean_history.bat
+complete_cleanup.bat
+
 # Java
 *.jar
 !gradle-wrapper.jar
