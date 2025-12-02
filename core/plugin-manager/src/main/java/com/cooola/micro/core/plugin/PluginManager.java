@@ -2,7 +2,6 @@ package com.cooola.micro.core.plugin;
 
 import com.cooola.micro.core.api.*;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -18,11 +17,8 @@ public class PluginManager {
     
     private final Map<String, CooolaPlugin> plugins = new ConcurrentHashMap<>();
     private final Map<String, PluginStatus> pluginStatuses = new ConcurrentHashMap<>();
-    private final Map<String, List<EventListener>> eventListeners = new ConcurrentHashMap<>();
+    private final Map<String, List<com.cooola.micro.core.api.EventListener>> eventListeners = new ConcurrentHashMap<>();
     private final Map<String, String> configuration = new ConcurrentHashMap<>();
-    
-    @Autowired
-    private PluginLoader pluginLoader;
     
     /**
      * プラグインを登録
@@ -151,7 +147,7 @@ public class PluginManager {
      * @param data イベントデータ
      */
     public void publishEvent(String eventType, Object data) {
-        List<EventListener> listeners = eventListeners.get(eventType);
+        List<com.cooola.micro.core.api.EventListener> listeners = eventListeners.get(eventType);
         if (listeners != null) {
             listeners.forEach(listener -> {
                 try {
@@ -168,7 +164,7 @@ public class PluginManager {
      * @param eventType イベントタイプ
      * @param listener イベントリスナー
      */
-    public void addEventListener(String eventType, EventListener listener) {
+    public void addEventListener(String eventType, com.cooola.micro.core.api.EventListener listener) {
         eventListeners.computeIfAbsent(eventType, k -> new ArrayList<>()).add(listener);
     }
     
@@ -177,8 +173,8 @@ public class PluginManager {
      * @param eventType イベントタイプ
      * @param listener イベントリスナー
      */
-    public void removeEventListener(String eventType, EventListener listener) {
-        List<EventListener> listeners = eventListeners.get(eventType);
+    public void removeEventListener(String eventType, com.cooola.micro.core.api.EventListener listener) {
+        List<com.cooola.micro.core.api.EventListener> listeners = eventListeners.get(eventType);
         if (listeners != null) {
             listeners.remove(listener);
         }
