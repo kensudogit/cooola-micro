@@ -14,14 +14,15 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 @Component
 public class PluginManager {
-    
+
     private final Map<String, CooolaPlugin> plugins = new ConcurrentHashMap<>();
     private final Map<String, PluginStatus> pluginStatuses = new ConcurrentHashMap<>();
     private final Map<String, List<com.cooola.micro.core.api.EventListener>> eventListeners = new ConcurrentHashMap<>();
     private final Map<String, String> configuration = new ConcurrentHashMap<>();
-    
+
     /**
      * プラグインを登録
+     * 
      * @param plugin プラグインインスタンス
      */
     public void registerPlugin(CooolaPlugin plugin) {
@@ -30,9 +31,10 @@ public class PluginManager {
         pluginStatuses.put(name, PluginStatus.UNINITIALIZED);
         log.info("Plugin registered: {}", name);
     }
-    
+
     /**
      * プラグインを初期化
+     * 
      * @param pluginName プラグイン名
      */
     public void initializePlugin(String pluginName) {
@@ -40,7 +42,7 @@ public class PluginManager {
         if (plugin == null) {
             throw new IllegalArgumentException("Plugin not found: " + pluginName);
         }
-        
+
         try {
             PluginContext context = new DefaultPluginContext(this, pluginName);
             plugin.initialize(context);
@@ -52,9 +54,10 @@ public class PluginManager {
             throw new RuntimeException("Plugin initialization failed", e);
         }
     }
-    
+
     /**
      * プラグインを開始
+     * 
      * @param pluginName プラグイン名
      */
     public void startPlugin(String pluginName) {
@@ -62,12 +65,12 @@ public class PluginManager {
         if (plugin == null) {
             throw new IllegalArgumentException("Plugin not found: " + pluginName);
         }
-        
+
         PluginStatus status = pluginStatuses.get(pluginName);
         if (status != PluginStatus.INITIALIZED && status != PluginStatus.STOPPED) {
             throw new IllegalStateException("Plugin is not in correct state: " + status);
         }
-        
+
         try {
             pluginStatuses.put(pluginName, PluginStatus.STARTING);
             plugin.start();
@@ -79,9 +82,10 @@ public class PluginManager {
             throw new RuntimeException("Plugin start failed", e);
         }
     }
-    
+
     /**
      * プラグインを停止
+     * 
      * @param pluginName プラグイン名
      */
     public void stopPlugin(String pluginName) {
@@ -89,7 +93,7 @@ public class PluginManager {
         if (plugin == null) {
             throw new IllegalArgumentException("Plugin not found: " + pluginName);
         }
-        
+
         try {
             pluginStatuses.put(pluginName, PluginStatus.STOPPING);
             plugin.stop();
@@ -101,9 +105,10 @@ public class PluginManager {
             throw new RuntimeException("Plugin stop failed", e);
         }
     }
-    
+
     /**
      * プラグインを削除
+     * 
      * @param pluginName プラグイン名
      */
     public void unregisterPlugin(String pluginName) {
@@ -113,26 +118,29 @@ public class PluginManager {
             log.info("Plugin unregistered: {}", pluginName);
         }
     }
-    
+
     /**
      * プラグイン一覧を取得
+     * 
      * @return プラグイン一覧
      */
     public List<CooolaPlugin> getAllPlugins() {
         return new ArrayList<>(plugins.values());
     }
-    
+
     /**
      * プラグインの状態を取得
+     * 
      * @param pluginName プラグイン名
      * @return プラグイン状態
      */
     public PluginStatus getPluginStatus(String pluginName) {
         return pluginStatuses.getOrDefault(pluginName, PluginStatus.UNINITIALIZED);
     }
-    
+
     /**
      * 実行中のプラグイン一覧を取得
+     * 
      * @return 実行中プラグイン一覧
      */
     public List<CooolaPlugin> getRunningPlugins() {
@@ -140,11 +148,12 @@ public class PluginManager {
                 .filter(plugin -> PluginStatus.RUNNING.equals(pluginStatuses.get(plugin.getName())))
                 .toList();
     }
-    
+
     /**
      * イベントを発行
+     * 
      * @param eventType イベントタイプ
-     * @param data イベントデータ
+     * @param data      イベントデータ
      */
     public void publishEvent(String eventType, Object data) {
         List<com.cooola.micro.core.api.EventListener> listeners = eventListeners.get(eventType);
@@ -158,20 +167,22 @@ public class PluginManager {
             });
         }
     }
-    
+
     /**
      * イベントリスナーを追加
+     * 
      * @param eventType イベントタイプ
-     * @param listener イベントリスナー
+     * @param listener  イベントリスナー
      */
     public void addEventListener(String eventType, com.cooola.micro.core.api.EventListener listener) {
         eventListeners.computeIfAbsent(eventType, k -> new ArrayList<>()).add(listener);
     }
-    
+
     /**
      * イベントリスナーを削除
+     * 
      * @param eventType イベントタイプ
-     * @param listener イベントリスナー
+     * @param listener  イベントリスナー
      */
     public void removeEventListener(String eventType, com.cooola.micro.core.api.EventListener listener) {
         List<com.cooola.micro.core.api.EventListener> listeners = eventListeners.get(eventType);
@@ -179,31 +190,34 @@ public class PluginManager {
             listeners.remove(listener);
         }
     }
-    
+
     /**
      * 設定値を取得
+     * 
      * @param key 設定キー
      * @return 設定値
      */
     public String getConfiguration(String key) {
         return configuration.get(key);
     }
-    
+
     /**
      * 設定値を設定
-     * @param key 設定キー
+     * 
+     * @param key   設定キー
      * @param value 設定値
      */
     public void setConfiguration(String key, String value) {
         configuration.put(key, value);
     }
-    
+
     /**
      * プラグインの依存関係を解決
+     * 
      * @param pluginName プラグイン名
      * @return プラグインインスタンス
      */
     public CooolaPlugin resolveDependency(String pluginName) {
         return plugins.get(pluginName);
     }
-} 
+}
