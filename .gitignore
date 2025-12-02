@@ -1,0 +1,68 @@
+# Build outputs
+build/
+dist/
+out/
+target/
+bin/
+*.class
+
+# Gradle
+.gradle/
+gradle-app.setting
+!gradle-wrapper.jar
+!gradle-wrapper.properties
+
+# IDE
+.idea/
+*.iml
+*.iws
+*.ipr
+.vscode/
+.settings/
+.classpath
+.project
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Angular cache and build artifacts
+frontend/.angular/
+frontend/node_modules/
+frontend/dist/
+frontend/.vercel/
+
+# Node modules
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# Java
+*.jar
+!gradle-wrapper.jar
+*.war
+*.ear
+*.nar
+
+# Spring Boot
+application-*.yml
+!application.yml
+!application-*.yml.example
+
